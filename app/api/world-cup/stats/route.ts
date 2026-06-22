@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
-import { getTournamentStats, getTopScorers } from '@/lib/services'
+import { getRealTournamentStats, getRealTopScorers } from '@/lib/worldCupRealData'
 
 export async function GET() {
   return NextResponse.json({
-    stats: getTournamentStats(),
-    scorers: getTopScorers(),
+    stats: getRealTournamentStats(),
+    scorers: getRealTopScorers(),
   })
 }
