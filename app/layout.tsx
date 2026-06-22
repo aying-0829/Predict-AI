@@ -123,7 +123,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ToastProvider>
           <I18nProvider>
             <SearchProvider>
-              <Header />
+              <ErrorBoundary silent>
+                <Header />
+              </ErrorBoundary>
               <ErrorBoundary silent>
                 <main id="main-content" role="main" className="relative z-[1]">
                   {children}

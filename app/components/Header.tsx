@@ -13,6 +13,7 @@ import {
   Bell,
   ArrowsOut,
   User,
+  SignOut,
   List,
   X,
 } from 'phosphor-react'
