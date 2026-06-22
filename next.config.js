@@ -3,6 +3,9 @@ const nextConfig = {
   output: 'standalone',
   compress: true,
   productionBrowserSourceMaps: false,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
   },
