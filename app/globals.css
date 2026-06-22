@@ -1,0 +1,829 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   Predict AI — 未来科技感色彩体系
+   赛博朋克色彩 × 冷光极简克制
+   ============================================================ */
+:root {
+  --bg-deep: #0a0a0f;
+  --bg-panel: rgba(10, 10, 18, 0.85);
+  --bg-card: rgba(255, 255, 255, 0.012);
+  --neon-cyan: #00f0ff;
+  --neon-magenta: #ff00aa;
+  --neon-amber: #f59e0b;
+  --border-laser: rgba(0, 240, 255, 0.15);
+  --border-laser-hover: rgba(0, 240, 255, 0.35);
+  --text-heading: #f0f0fa;
+  --text-body: #c8c8e0;
+  --text-dim: #5a5f80;
+  --text-label: #6b7094;
+}
+
+/* ============================================================
+   Base Layer
+   ============================================================ */
+@layer base {
+  body {
+    background: var(--bg-deep);
+    color: var(--text-body);
+    font-family: var(--font-space-grotesk), 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* 全局电路网格底纹 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+    background-size: 48px 48px, 48px 48px, 48px 48px;
+    background-position: center;
+  }
+
+  /* 顶部霓虹光晕 */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 600px;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0, 240, 255, 0.05) 0%,
+      rgba(255, 0, 170, 0.03) 40%,
+      transparent 70%
+    );
+    filter: blur(60px);
+  }
+}
+
+/* ============================================================
+   Components Layer
+   ============================================================ */
+@layer components {
+
+  /* ---- 激光蚀刻面板（默认容器） ---- */
+  .laser-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-laser);
+    border-radius: 12px;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .laser-panel:hover {
+    border-color: var(--border-laser-hover);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.06);
+  }
+
+  /* ---- 玻璃面板（向后兼容别名） ---- */
+  .glass-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-laser);
+    border-radius: 12px;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+  .glass-panel:hover {
+    border-color: var(--border-laser-hover);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.06);
+  }
+
+  /* ---- 玻璃卡片（向后兼容） ---- */
+  .glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-laser);
+    border-radius: 12px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .glass-card:hover {
+    border-color: var(--border-laser-hover);
+    box-shadow: 0 0 28px rgba(0, 240, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ---- 全息投射卡片（KPI 关键数据） ---- */
+  .holo-card {
+    position: relative;
+    background: var(--bg-card);
+    border-radius: 14px;
+    border: 1.5px solid transparent;
+    background-clip: padding-box;
+  }
+  .holo-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .holo-card > * {
+    position: relative;
+    z-index: 1;
+  }
+  .holo-card:hover {
+    box-shadow:
+      0 0 30px rgba(0, 240, 255, 0.08),
+      0 0 60px rgba(255, 0, 170, 0.04);
+  }
+
+  /* ---- 激光按钮 ---- */
+  .btn-laser {
+    background: transparent;
+    border: 1px solid var(--border-laser);
+    color: var(--neon-cyan);
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-family: var(--font-space-grotesk), sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-laser:hover {
+    border-color: var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.06);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.15);
+  }
+  .btn-laser:active {
+    transform: scale(0.97);
+  }
+
+  /* ---- 全息渐变按钮（主 CTA） ---- */
+  .btn-holo {
+    position: relative;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+    color: #0a0a0f;
+    font-weight: 600;
+    padding: 10px 28px;
+    border-radius: 10px;
+    overflow: hidden;
+    font-family: var(--font-space-grotesk), sans-serif;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-holo::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -100%;
+    width: 60px;
+    height: 200%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.3),
+      transparent
+    );
+    transform: skewX(-20deg);
+    animation: shine 2.5s ease-in-out infinite;
+  }
+  .btn-holo:hover {
+    box-shadow:
+      0 0 30px rgba(0, 240, 255, 0.3),
+      0 0 60px rgba(255, 0, 170, 0.15);
+  }
+  .btn-holo:active {
+    transform: scale(0.97);
+  }
+  .btn-holo:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ---- 终端输入框 ---- */
+  .input-terminal {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-laser);
+    color: var(--neon-cyan);
+    font-family: var(--font-jetbrains-mono), monospace;
+    padding: 8px 14px 8px 32px;
+    border-radius: 6px;
+    caret-color: var(--neon-cyan);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.3s;
+  }
+  .input-terminal::placeholder {
+    color: var(--text-dim);
+    font-family: var(--font-jetbrains-mono), monospace;
+  }
+  .input-terminal:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.1);
+  }
+
+  /* ---- 页面标题 ---- */
+  .page-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-magenta) 70%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ---- Hero 数字 ---- */
+  .hero-number {
+    font-size: clamp(4rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    background: linear-gradient(180deg, #ffffff 0%, var(--neon-cyan) 60%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(0, 240, 255, 0.35));
+  }
+
+  /* ---- KPI 数字 ---- */
+  .kpi-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+  }
+
+  /* ---- 区块标题 ---- */
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-heading);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(180deg, var(--neon-cyan), var(--neon-magenta));
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+  }
+
+  /* ---- 发光分割线 ---- */
+  .glow-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 240, 255, 0.15) 20%,
+      rgba(0, 240, 255, 0.25) 50%,
+      rgba(0, 240, 255, 0.15) 80%,
+      transparent 100%
+    );
+  }
+
+  /* ---- 数据徽章 ---- */
+  .data-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(0, 240, 255, 0.08);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    color: var(--neon-cyan);
+  }
+
+  /* ---- Tab 栏 ---- */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 12px;
+    background: rgba(10, 12, 30, 0.5);
+    border: 1px solid var(--border-laser);
+  }
+  .tab-item {
+    padding: 8px 20px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-dim);
+    transition: all 0.25s;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+  }
+  .tab-item:hover {
+    color: var(--text-body);
+    background: rgba(0, 240, 255, 0.05);
+  }
+  .tab-item.active {
+    color: var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.12);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.12);
+  }
+
+  /* ---- 数据行 ---- */
+  .data-row {
+    transition: background 0.2s;
+  }
+  .data-row:hover {
+    background: rgba(0, 240, 255, 0.03);
+  }
+
+  /* ---- 状态胶囊 ---- */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .status-live {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: var(--neon-amber);
+  }
+  .status-done {
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    color: var(--neon-cyan);
+  }
+
+  /* ---- 霓虹卡片（向后兼容） ---- */
+  .neon-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-laser);
+    border-radius: 14px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  .neon-card:hover {
+    border-color: var(--border-laser-hover);
+    box-shadow:
+      0 0 32px rgba(0, 240, 255, 0.08),
+      inset 0 0 20px rgba(0, 240, 255, 0.03);
+  }
+
+  /* ---- 霓虹按钮（向后兼容） ---- */
+  .neon-btn {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.08), rgba(255, 0, 170, 0.08));
+    border: 1px solid var(--border-laser-hover);
+    color: var(--text-heading);
+    border-radius: 10px;
+    padding: 10px 24px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .neon-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.12), rgba(255, 0, 170, 0.12));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .neon-btn:hover::before {
+    opacity: 1;
+  }
+  .neon-btn:hover {
+    border-color: rgba(0, 240, 255, 0.5);
+    box-shadow:
+      0 0 24px rgba(0, 240, 255, 0.18),
+      0 0 48px rgba(255, 0, 170, 0.08);
+  }
+
+  /* ---- Welcome Hero（空状态引导页） ---- */
+  .welcome-hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+  .welcome-ambient-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 500px;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse,
+      rgba(0, 243, 255, 0.07) 0%,
+      rgba(157, 80, 255, 0.05) 35%,
+      rgba(255, 110, 199, 0.03) 60%,
+      transparent 75%
+    );
+    filter: blur(100px);
+    animation: welcome-glow-pulse 4s ease-in-out infinite;
+  }
+  .welcome-title-cyan {
+    display: block;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #00f3ff;
+    text-shadow:
+      0 0 40px rgba(0, 243, 255, 0.45),
+      0 0 100px rgba(0, 243, 255, 0.15),
+      0 0 160px rgba(0, 243, 255, 0.06);
+    animation: welcome-title-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .welcome-title-brand {
+    display: block;
+    font-size: clamp(3rem, 10vw, 5.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-top: 0.15em;
+    background: linear-gradient(
+      135deg,
+      #ff6ec7 0%,
+      #c471ed 25%,
+      #9d50ff 50%,
+      #12c2e9 75%,
+      #00f3ff 100%
+    );
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(255, 110, 199, 0.35));
+    animation: welcome-title-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both,
+      welcome-gradient-shift 6s ease-in-out infinite;
+  }
+  .welcome-subtitle {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 1.125rem;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .welcome-btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+  .welcome-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.875rem 1.75rem;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .welcome-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.35s;
+    pointer-events: none;
+  }
+  .welcome-btn:hover::after {
+    opacity: 1;
+  }
+  .welcome-btn:active {
+    transform: scale(0.97);
+  }
+  .welcome-btn-cyan {
+    color: #00f3ff;
+    background: rgba(0, 243, 255, 0.05);
+    border: 1px solid rgba(0, 243, 255, 0.22);
+    box-shadow: 0 0 18px rgba(0, 243, 255, 0.08), inset 0 0 18px rgba(0, 243, 255, 0.02);
+  }
+  .welcome-btn-cyan::after {
+    box-shadow: 0 0 0 1px rgba(0, 243, 255, 0.5), 0 0 40px rgba(0, 243, 255, 0.2);
+  }
+  .welcome-btn-cyan:hover {
+    background: rgba(0, 243, 255, 0.1);
+    border-color: rgba(0, 243, 255, 0.45);
+    box-shadow: 0 0 32px rgba(0, 243, 255, 0.2), 0 0 64px rgba(0, 243, 255, 0.06);
+    transform: translateY(-1px);
+  }
+  .welcome-btn-magenta {
+    color: #ff6ec7;
+    background: rgba(255, 110, 199, 0.05);
+    border: 1px solid rgba(255, 110, 199, 0.22);
+    box-shadow: 0 0 18px rgba(255, 110, 199, 0.08), inset 0 0 18px rgba(255, 110, 199, 0.02);
+  }
+  .welcome-btn-magenta::after {
+    box-shadow: 0 0 0 1px rgba(255, 110, 199, 0.5), 0 0 40px rgba(255, 110, 199, 0.2);
+  }
+  .welcome-btn-magenta:hover {
+    background: rgba(255, 110, 199, 0.1);
+    border-color: rgba(255, 110, 199, 0.45);
+    box-shadow: 0 0 32px rgba(255, 110, 199, 0.2), 0 0 64px rgba(255, 110, 199, 0.06);
+    transform: translateY(-1px);
+  }
+
+  /* ---- 排版辅助 ---- */
+  .text-h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .text-h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .text-h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .text-body {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .text-caption {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-dim);
+  }
+  .text-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-label);
+  }
+
+  /* ---- 电路网格背景 ---- */
+  .circuit-grid {
+    background-image: radial-gradient(circle, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+    background-size: 48px 48px, 48px 48px, 48px 48px;
+    background-position: center;
+  }
+
+  /* ---- 脉冲呼吸 ---- */
+  .pulse {
+    animation: pulse-breath 3s ease-in-out infinite;
+  }
+
+  /* ---- 终端打字机光标 ---- */
+  .typewriter-cursor::after {
+    content: '▊';
+    animation: blink 1s step-end infinite;
+    color: var(--neon-cyan);
+    margin-left: 2px;
+  }
+
+  /* ---- 终端 ASCII 面板 ---- */
+  .terminal-panel {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--border-laser);
+    border-radius: 8px;
+    font-family: var(--font-jetbrains-mono), monospace;
+    color: var(--neon-cyan);
+    padding: 16px;
+    position: relative;
+  }
+  .terminal-panel::before {
+    content: '┌─ TERMINAL ──────────────────────┐';
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    white-space: pre;
+    font-family: var(--font-jetbrains-mono), monospace;
+  }
+  .terminal-panel::after {
+    content: '└──────────────────────────────────┘';
+    display: block;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    white-space: pre;
+    font-family: var(--font-jetbrains-mono), monospace;
+  }
+
+  /* ---- 扫描线覆盖 ---- */
+  .scanline-overlay {
+    position: relative;
+    overflow: hidden;
+  }
+  .scanline-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 240, 255, 0.015) 2px,
+      rgba(0, 240, 255, 0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ---- 全屏覆盖导航 ---- */
+  .mobile-nav-overlay {
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+  .mobile-nav-item {
+    font-family: var(--font-orbitron), sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    position: relative;
+  }
+}
+
+/* ============================================================
+   Utilities Layer
+   ============================================================ */
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .text-glow-cyan {
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+  }
+  .text-glow-magenta {
+    text-shadow: 0 0 12px rgba(255, 0, 170, 0.3);
+  }
+}
+
+/* ============================================================
+   Animation Keyframes
+   ============================================================ */
+@keyframes pulse-breath {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shine {
+  0%,
+  100% {
+    left: -100%;
+  }
+  50% {
+    left: 150%;
+  }
+}
+
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes typewriter-reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0;
+  }
+}
+
+@keyframes welcome-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@keyframes welcome-title-in {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes welcome-gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ============================================================
+   Reduced Motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

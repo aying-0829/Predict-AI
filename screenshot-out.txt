@@ -1,0 +1,7 @@
+BROWSER: %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold
+BROWSER: <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
+BROWSER: SW registered: http://localhost:3020/
+BROWSER: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+BROWSER: Failed to load resource: the server responded with a status of 401 (Unauthorized)
+RESULT: {"hasRenderError":false,"hasFloatingLines":true}
+SCREENSHOT_SAVED: C:\Users\Administrator\AppData\Roaming\Tencent\Marvis\User\oAN1i2bne2BhNptnZFJNGn5Amfo4\workspace\conv_19ec0f9d53d_2cdbea52eed4\temp\predict-ai-staging\screenshot.png

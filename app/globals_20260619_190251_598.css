@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background: #080814;
+    color: #e0e0f0;
+    font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: radial-gradient(circle at 50% 0%, rgba(0,229,255,0.04) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.03) 0%, transparent 50%);
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 20%, black 30%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 20%, black 30%, transparent 70%);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: rgba(10,12,30,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,229,255,0.12);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .neon-card {
+    background: rgba(10,12,30,0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0,229,255,0.08);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .neon-card:hover {
+    border-color: rgba(0,229,255,0.3);
+    box-shadow: 0 0 30px rgba(0,229,255,0.08);
+    transform: translateY(-2px);
+  }
+  .neon-btn {
+    background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(168,85,247,0.12));
+    border: 1px solid rgba(0,229,255,0.2);
+    color: #e0e0f0;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .neon-btn:hover {
+    border-color: rgba(0,229,255,0.5);
+    box-shadow: 0 0 25px rgba(0,229,255,0.15);
+    transform: translateY(-1px);
+  }
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00e5ff, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
