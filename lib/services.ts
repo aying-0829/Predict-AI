@@ -21,6 +21,7 @@ import {
   type GroupStanding,
   type Scorer,
 } from './data'
+import { getRealCompletedMatches, getRealGroupStandings } from './worldCupRealData'
 
 // 类型别名：lottery 页面使用 LotteryDrawData 引用 LotteryDraw
 export type LotteryDrawData = LotteryDraw
@@ -511,7 +512,8 @@ export function getSportMatches(filter?: string): SportMatch[] {
   ]
 
   // 世界杯比赛：根据日期判断状态
-  const enrichedWC = worldCupMatches.map((m) => {
+  const wcMatches = getWorldCupMatches()
+  const enrichedWC = wcMatches.map((m) => {
     const datePart = m.time.split(' ')[0]
     const status: SportMatch['status'] = datePart < today ? 'finished' : 'upcoming'
     return enrich(m, status)
@@ -541,11 +543,12 @@ function parseScoreToWinner(score: string): 'home' | 'draw' | 'away' {
 
 /* ============ 8. getLiveMatch ============ */
 export function getLiveMatch(matchId?: string) {
+  const matches = getWorldCupMatches()
   if (matchId) {
-    const found = worldCupMatches.find((m) => m.id === matchId)
+    const found = matches.find((m) => m.id === matchId)
     if (found) return found
   }
-  return worldCupMatches[0] || null
+  return matches[0] || null
 }
 
 /* ============ 9. getAIAnalysis ============ */
@@ -567,7 +570,7 @@ export function getAIAnalysis(): AIAnalysisResult {
 /* ============ 10. getHandicapData ============ */
 export function getHandicapData(): HandicapItem[] {
   // 从现有比赛数据构建 team 名称映射
-  const allMatches = [...worldCupMatches, ...getSportMatches('league')]
+  const allMatches = [...getWorldCupMatches(), ...getSportMatches('league')]
   const matchMap = new Map(allMatches.map((m) => [m.id, m]))
 
   const raw = [
@@ -808,9 +811,76 @@ export function getPointsRules(): PointsRule[] {
 
 /* ============ 补充：已有页面引用的便捷函数 ============ */
 
-/** 返回所有世界杯比赛数据 */
+/** 返回所有世界杯比赛数据（真实数据 + 未赛预测） */
 export function getWorldCupMatches(): Match[] {
-  return worldCupMatches
+  const realMatches = getRealCompletedMatches()
+  const usedPairs = new Set<string>()
+  const result: Match[] = []
+
+  // 转换已完赛数据
+  for (const rm of realMatches) {
+    const pairKey = `${rm.home}|${rm.away}`
+    usedPairs.add(pairKey)
+
+    const hasScore = rm.homeScore !== undefined && rm.awayScore !== undefined
+    let homeWin = 35, draw = 30, awayWin = 35
+    if (hasScore) {
+      const h = rm.homeScore!, a = rm.awayScore!
+      if (h > a) { homeWin = 55; draw = 25; awayWin = 20 }
+      else if (a > h) { homeWin = 20; draw = 25; awayWin = 55 }
+      else { homeWin = 30; draw = 40; awayWin = 30 }
+    }
+
+    result.push({
+      id: rm.id,
+      time: `${rm.date.slice(5)} ${rm.time}`,
+      league: '世界杯',
+      group: `${rm.group}组`,
+      home: rm.home,
+      homeFlag: rm.homeFlag,
+      away: rm.away,
+      awayFlag: rm.awayFlag,
+      homeWin,
+      draw,
+      awayWin,
+      aiScore: hasScore ? `${rm.homeScore}:${rm.awayScore}` : undefined,
+    })
+  }
+
+  // 从小组积分生成未赛场次
+  const standings = getRealGroupStandings()
+  let upId = 0
+  for (const [group, teams] of Object.entries(standings)) {
+    for (let i = 0; i < teams.length; i++) {
+      for (let j = i + 1; j < teams.length; j++) {
+        const pk1 = `${teams[i].team}|${teams[j].team}`
+        const pk2 = `${teams[j].team}|${teams[i].team}`
+        if (usedPairs.has(pk1) || usedPairs.has(pk2)) continue
+
+        const hPts = teams[i].pts || 0
+        const aPts = teams[j].pts || 0
+        const total = (hPts + aPts) || 1
+
+        result.push({
+          id: `${group}_up_${++upId}`,
+          time: '06-23 14:00',
+          league: '世界杯',
+          group: `${group}组`,
+          home: teams[i].team,
+          homeFlag: teams[i].flag,
+          away: teams[j].team,
+          awayFlag: teams[j].flag,
+          homeWin: Math.round(25 + (hPts / total) * 25),
+          draw: 30,
+          awayWin: Math.round(25 + (aPts / total) * 25),
+          aiScore: undefined,
+        })
+        usedPairs.add(pk1)
+      }
+    }
+  }
+
+  return result
 }
 
 /** 返回比赛日期列表 */

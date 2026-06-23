@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getLiveMatch } from '@/lib/services'
+import { getRealCompletedMatches } from '@/lib/worldCupRealData'
 import {
   fetchWorldCupGames,
   fetchSportScoreLive,
@@ -66,5 +66,28 @@ export async function GET() {
     // fallback
   }
 
-  return NextResponse.json({ code: 0, data: getLiveMatch() })
+  // 降级：使用真实世界杯已完赛比赛的最近一场
+  const completedMatches = getRealCompletedMatches()
+  if (completedMatches.length > 0) {
+    const latest = completedMatches[completedMatches.length - 1]
+    return NextResponse.json({
+      code: 0,
+      data: {
+        id: latest.id,
+        time: `${latest.date.slice(5).replace(/-/g, '-')} ${latest.time}`,
+        league: '世界杯',
+        group: `${latest.group}组`,
+        home: latest.home,
+        homeFlag: latest.homeFlag,
+        away: latest.away,
+        awayFlag: latest.awayFlag,
+        homeWin: 0,
+        draw: 0,
+        awayWin: 0,
+        aiScore: `${latest.homeScore ?? '-'}:${latest.awayScore ?? '-'}`,
+      },
+    })
+  }
+
+  return NextResponse.json({ code: 0, data: null })
 }

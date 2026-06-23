@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken } from '@/lib/auth'
+import { getRealCompletedMatches } from '@/lib/worldCupRealData'
 
 /**
  * SSE (Server-Sent Events) 实时推送端点
@@ -30,6 +31,10 @@ export async function GET(req: NextRequest) {
 
   const stream = new ReadableStream({
     start(controller) {
+      // 取最近一场已完赛比赛作为实时推送内容
+      const completedMatches = getRealCompletedMatches()
+      const recentMatch = completedMatches[completedMatches.length - 1] || null
+
       // 连接建立事件
       const connectedEvent = `event: connected\ndata: ${JSON.stringify({ userId, timestamp: Date.now() })}\n\n`
       controller.enqueue(encoder.encode(connectedEvent))
@@ -64,12 +69,18 @@ export async function GET(req: NextRequest) {
           controller.enqueue(encoder.encode(event))
         }
 
-        // 模拟事件：每 25 秒推送一次比分更新
-        if (heartbeatCount % 5 === 1) {
+        // 模拟事件：每 25 秒推送一次比分更新（使用真实比赛数据）
+        if (heartbeatCount % 5 === 1 && recentMatch) {
           const event = `event: live_match_update\ndata: ${JSON.stringify({
             type: 'live_match_update',
             timestamp: Date.now(),
-            match: { home: '巴西', away: '摩洛哥', homeScore: 2, awayScore: 1, minute: 75 + Math.floor(Math.random() * 10) },
+            match: {
+              home: recentMatch.home,
+              away: recentMatch.away,
+              homeScore: recentMatch.homeScore,
+              awayScore: recentMatch.awayScore,
+              minute: 90,
+            },
           })}\n\n`
           controller.enqueue(encoder.encode(event))
         }

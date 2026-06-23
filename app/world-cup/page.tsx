@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState, type ComponentType } from 'react'
+import { Suspense, useEffect, useState, useMemo, type ComponentType } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { getWorldCupMatches, getLiveMatch } from '@/lib/services'
 import type { Match } from '@/lib/data'
@@ -24,10 +24,58 @@ function MatchesContent() {
   const [activeRound, setActiveRound] = useState<'group' | 'knockout'>(
     initialMatch ? (initialMatch.group.includes('组') ? 'group' : 'knockout') : 'group'
   )
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 
   const groupMatches = matches.filter((m) => m.group.includes('组'))
   const knockoutMatches = matches.filter((m) => !m.group.includes('组'))
   const displayMatches = activeRound === 'group' ? groupMatches : knockoutMatches
+
+  // 按小组分组
+  const groupedMatches = useMemo(() => {
+    if (activeRound !== 'group') return null
+    const groups = new Map<string, Match[]>()
+    for (const m of groupMatches) {
+      const g = m.group
+      if (!groups.has(g)) groups.set(g, [])
+      groups.get(g)!.push(m)
+    }
+    // 按字母序排序
+    return Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
+  }, [groupMatches, activeRound])
+
+  const toggleGroup = (group: string) => {
+    setCollapsedGroups((prev) => ({ ...prev, [group]: !prev[group] }))
+  }
+
+  const renderMatchCard = (m: Match) => (
+    <button
+      key={m.id}
+      onClick={() => setSelectedMatch(m)}
+      className={`w-full text-left laser-panel p-4 transition-all ${
+        selectedMatch?.id === m.id
+          ? 'border-[var(--neon-cyan)] shadow-[0_0_20px_rgba(0,240,255,0.08)]'
+          : ''
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{getFlagEmoji(m.homeFlag)}</span>
+          <span className="text-sm font-medium text-[var(--text-heading)]">{m.home}</span>
+        </div>
+        <span className="text-xs text-[var(--text-dim)] font-mono">VS</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-[var(--text-heading)]">{m.away}</span>
+          <span className="text-2xl">{getFlagEmoji(m.awayFlag)}</span>
+        </div>
+      </div>
+      <div className="flex items-center gap-3 mt-2">
+        <span className="text-[10px] text-[var(--text-label)] uppercase">{m.time}</span>
+        <span className="text-[10px] text-[var(--neon-cyan)]/60">
+          AI 预测: {m.aiScore ?? '待定'}
+        </span>
+      </div>
+    </button>
+  )
 
   return (
     <div className="max-w-[1240px] mx-auto px-6 py-8 relative z-[1]">
@@ -60,44 +108,9 @@ function MatchesContent() {
         </div>
       </div>
 
-      <div className="relative z-[1] flex gap-6 flex-col lg:flex-row">
-        {/* 赛事列表 */}
-        <div className="lg:w-[400px] flex-shrink-0 space-y-3">
-          {displayMatches.map((m) => (
-            <button
-              key={m.id}
-              onClick={() => setSelectedMatch(m)}
-              className={`w-full text-left laser-panel p-4 transition-all ${
-                selectedMatch?.id === m.id
-                  ? 'border-[var(--neon-cyan)] shadow-[0_0_20px_rgba(0,240,255,0.08)]'
-                  : ''
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{getFlagEmoji(m.homeFlag)}</span>
-                  <span className="text-sm font-medium text-[var(--text-heading)]">{m.home}</span>
-                </div>
-                <span className="text-xs text-[var(--text-dim)] font-mono">VS</span>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-[var(--text-heading)]">{m.away}</span>
-                  <span className="text-2xl">{getFlagEmoji(m.awayFlag)}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mt-2">
-                <span className="text-[10px] text-[var(--text-label)] uppercase">
-                  {m.time}
-                </span>
-                <span className="text-[10px] text-[var(--neon-cyan)]/60">
-                  AI 预测: {m.aiScore ?? '待定'}
-                </span>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* 详情面板 — 霓虹仪表盘 */}
-        <div className="flex-1">
+      <div className="relative z-[1] flex flex-col gap-6">
+        {/* 上半部分：分析面板 */}
+        <div>
           {selectedMatch ? (
             <div className="laser-panel p-8 scanline-overlay">
               {/* 对战双方 */}
@@ -131,7 +144,7 @@ function MatchesContent() {
                 </div>
               </div>
 
-              {/* 赔率 / 概率条 — 霓虹仪表盘 */}
+              {/* 赔率 / 概率条 */}
               <div className="space-y-5">
                 <div>
                   <div className="flex justify-between text-xs mb-1.5">
@@ -157,10 +170,7 @@ function MatchesContent() {
                   <div className="h-2 rounded-full overflow-hidden bg-[rgba(0,240,255,0.04)] border border-[var(--border-laser)]">
                     <div
                       className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${selectedMatch.draw}%`,
-                        background: 'var(--text-dim)',
-                      }}
+                      style={{ width: `${selectedMatch.draw}%`, background: 'var(--text-dim)' }}
                     />
                   </div>
                 </div>
@@ -218,9 +228,7 @@ function MatchesContent() {
                           {selectedMatch.home.substring(0, 2)}
                         </div>
                       </div>
-                      <div className="text-[10px] text-[var(--text-dim)] font-mono">
-                        {item.unit}
-                      </div>
+                      <div className="text-[10px] text-[var(--text-dim)] font-mono">{item.unit}</div>
                       <div>
                         <div
                           className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold text-white border-2"
@@ -241,13 +249,49 @@ function MatchesContent() {
               </div>
             </div>
           ) : (
-            <div className="laser-panel p-16 text-center">
+            <div className="laser-panel p-12 text-center">
               <div className="text-[var(--text-dim)] text-sm">
                 选择一场比赛以查看 AI 深度分析
               </div>
               <div className="mt-3 text-[10px] text-[var(--text-label)] uppercase tracking-widest font-mono">
                 雷达扫描引擎就绪
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* 下半部分：比赛列表 - 按小组分组 */}
+        <div>
+          {activeRound === 'group' && groupedMatches ? (
+            <div className="space-y-4">
+              {groupedMatches.map(([group, groupMatchList]) => {
+                const isCollapsed = collapsedGroups[group] ?? false
+                return (
+                  <div key={group}>
+                    <button
+                      onClick={() => toggleGroup(group)}
+                      className="w-full flex items-center justify-between laser-panel p-3 mb-0 border-b-0"
+                    >
+                      <span className="text-sm font-bold text-[var(--neon-cyan)] font-mono">
+                        {group}
+                      </span>
+                      <span className="text-[10px] text-[var(--text-dim)]">
+                        {groupMatchList.length} 场 &nbsp;
+                        {isCollapsed ? '▸' : '▾'}
+                      </span>
+                    </button>
+                    {!isCollapsed && (
+                      <div className="space-y-2">
+                        {groupMatchList.map(renderMatchCard)}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {displayMatches.map(renderMatchCard)}
             </div>
           )}
         </div>

@@ -20,6 +20,8 @@ const en: TranslationKeys = {
     logout: 'Logout',
     freeTrial: 'Free Trial',
     search: 'Search',
+    standings: 'Standings',
+    headlines: 'Headlines',
   },
   dashboard: {
     title: 'PREDICT AI - AI-Powered Prediction Engine',

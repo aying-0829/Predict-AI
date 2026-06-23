@@ -18,6 +18,8 @@ const zh = {
     logout: '退出',
     freeTrial: '免费试用',
     search: '搜索',
+    standings: '积分排名',
+    headlines: '世界杯头条',
   },
   dashboard: {
     title: 'PREDICT AI - AI驱动的概率预测引擎',

@@ -71,14 +71,31 @@ export async function getRealLotteryData(type: string, limit = 50): Promise<Real
   return all.slice(0, Math.min(limit, all.length))
 }
 
-/** 转为前端展示用的历史记录格式 */
-export function toHistoryItems(draws: RealDraw[], type: string): {
-  period: string; date: string; reds: number[]; blues: number[]
-}[] {
-  return draws.map(d => ({
-    period: d.period,
-    date: d.date,
-    reds: d.reds,
-    blues: d.blues,
-  }))
+/** 转为前端展示用的历史记录格式（含统计字段） */
+export function toHistoryItems(draws: RealDraw[], type: string) {
+  return draws.map((d, idx) => {
+    const reds = d.reds
+    const blues = d.blues
+    const blue = blues[0] ?? -1
+    const sum = reds.reduce((a, b) => a + b, 0)
+    const oddCount = reds.filter(n => n % 2 === 1).length
+    const evenCount = reds.length - oddCount
+    const z1 = reds.filter(n => type === 'ssq' ? n <= 11 : n <= 12).length
+    const z2 = reds.filter(n => type === 'ssq' ? n >= 12 && n <= 22 : n >= 13 && n <= 24).length
+    const z3 = reds.length - z1 - z2
+    return {
+      id: String(idx + 1),
+      type,
+      period: d.period,
+      date: d.date,
+      reds,
+      blues,
+      blue,
+      sum,
+      oddEven: `${oddCount}:${evenCount}`,
+      zone: `${z1}:${z2}:${z3}`,
+      sales: d.sales,
+      poolAmount: d.poolAmount,
+    }
+  })
 }

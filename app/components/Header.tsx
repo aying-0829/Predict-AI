@@ -16,6 +16,8 @@ import {
   SignOut,
   List,
   X,
+  Trophy,
+  Newspaper,
 } from 'phosphor-react'
 import SearchPanel from './search/SearchPanel'
 import LanguageSwitch from './i18n/LanguageSwitch'
@@ -60,6 +62,8 @@ export default function Header() {
     { href: '/lottery', label: t.nav.lottery, icon: Ticket },
     { href: '/live', label: t.nav.live, icon: Broadcast },
     { href: '/stats', label: t.nav.stats, icon: ChartBar },
+    { href: '/leaderboard', label: t.nav.standings, icon: Trophy },
+    { href: '/news', label: t.nav.headlines, icon: Newspaper },
   ]
 
   return (
