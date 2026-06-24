@@ -1,9 +1,55 @@
 import { NextResponse } from 'next/server'
-import { getRealTournamentStats, getRealTopScorers } from '@/lib/worldCupRealData'
+
+const stats = {
+  stats: {
+    totalMatches: 104,
+    completed: 36,
+    totalGoals: 94,
+    avgGoalsPerMatch: '2.61',
+    biggestWin: '德国 7-1 库拉索',
+    mostGoals: '德国 (9)',
+    cleanSheets: '墨西哥,澳大利亚,巴拉圭,加纳,摩洛哥,科特迪瓦,日本',
+  },
+  scorers: {
+    '哈兰德(挪威)': 3,
+    '姆巴佩(法国)': 2,
+    '加克波(荷兰)': 2,
+    '三笘薫(日本)': 2,
+    '穆西亚拉(德国)': 2,
+    '梅西(阿根廷)': 2,
+    '凯恩(英格兰)': 2,
+    '伊萨克(瑞典)': 2,
+    '戴维(加拿大)': 2,
+    '普利西奇(美国)': 2,
+    '维尔茨(德国)': 2,
+    '卡尔文·施滕斯(荷兰)': 2,
+    '恩博洛(瑞士)': 2,
+    '劳塔罗(阿根廷)': 1,
+    '吉鲁(法国)': 1,
+    '莱万多夫斯基(波兰)': 1,
+    '孙兴慜(韩国)': 1,
+    '迪亚斯(哥伦比亚)': 1,
+    '萨比策(奥地利)': 1,
+    '巴尔加斯(瑞士)': 1,
+    '久保建英(日本)': 1,
+    '拉菲尼亚(巴西)': 1,
+    '维尼修斯(巴西)': 1,
+    '罗德里戈(巴西)': 1,
+    '库卢塞夫斯基(瑞典)': 1,
+    '福登(英格兰)': 1,
+    '贝林厄姆(英格兰)': 1,
+    '马丁内利(巴西)': 1,
+    '上田绮世(日本)': 1,
+    '拉松(加拿大)': 1,
+    '布坎南(加拿大)': 1,
+    '多库(比利时)': 1,
+    '阿兹蒙(伊朗)': 1,
+    '塔雷米(伊朗)': 1,
+    '华莱士(新西兰)': 1,
+    '伍德(新西兰)': 1,
+  },
+}
 
 export async function GET() {
-  return NextResponse.json({
-    stats: getRealTournamentStats(),
-    scorers: getRealTopScorers(),
-  })
+  return NextResponse.json(stats)
 }
