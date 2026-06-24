@@ -1,55 +1,47 @@
 import { NextResponse } from 'next/server'
+import { getDB } from '@/lib/db'
 
-const stats = {
-  stats: {
-    totalMatches: 104,
-    completed: 36,
-    totalGoals: 94,
-    avgGoalsPerMatch: '2.61',
-    biggestWin: '德国 7-1 库拉索',
-    mostGoals: '德国 (9)',
-    cleanSheets: '墨西哥,澳大利亚,巴拉圭,加纳,摩洛哥,科特迪瓦,日本',
-  },
-  scorers: {
-    '哈兰德(挪威)': 3,
-    '姆巴佩(法国)': 2,
-    '加克波(荷兰)': 2,
-    '三笘薫(日本)': 2,
-    '穆西亚拉(德国)': 2,
-    '梅西(阿根廷)': 2,
-    '凯恩(英格兰)': 2,
-    '伊萨克(瑞典)': 2,
-    '戴维(加拿大)': 2,
-    '普利西奇(美国)': 2,
-    '维尔茨(德国)': 2,
-    '卡尔文·施滕斯(荷兰)': 2,
-    '恩博洛(瑞士)': 2,
-    '劳塔罗(阿根廷)': 1,
-    '吉鲁(法国)': 1,
-    '莱万多夫斯基(波兰)': 1,
-    '孙兴慜(韩国)': 1,
-    '迪亚斯(哥伦比亚)': 1,
-    '萨比策(奥地利)': 1,
-    '巴尔加斯(瑞士)': 1,
-    '久保建英(日本)': 1,
-    '拉菲尼亚(巴西)': 1,
-    '维尼修斯(巴西)': 1,
-    '罗德里戈(巴西)': 1,
-    '库卢塞夫斯基(瑞典)': 1,
-    '福登(英格兰)': 1,
-    '贝林厄姆(英格兰)': 1,
-    '马丁内利(巴西)': 1,
-    '上田绮世(日本)': 1,
-    '拉松(加拿大)': 1,
-    '布坎南(加拿大)': 1,
-    '多库(比利时)': 1,
-    '阿兹蒙(伊朗)': 1,
-    '塔雷米(伊朗)': 1,
-    '华莱士(新西兰)': 1,
-    '伍德(新西兰)': 1,
-  },
-}
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  return NextResponse.json(stats)
+  const db = getDB()
+
+  const totalMatches = (db.prepare('SELECT COUNT(*) as cnt FROM matches').get() as any).cnt
+  const completed = (db.prepare("SELECT COUNT(*) as cnt FROM matches WHERE status = 'finished'").get() as any).cnt
+
+  const goalRow = db.prepare("SELECT SUM(home_score) as h, SUM(away_score) as a FROM matches WHERE status = 'finished'").get() as any
+  const totalGoals = (goalRow.h || 0) + (goalRow.a || 0)
+  const avgGoalsPerMatch = completed > 0 ? (totalGoals / completed).toFixed(2) : '0.00'
+
+  const matches = db.prepare("SELECT * FROM matches WHERE status = 'finished'").all() as any[]
+  let biggestWin = ''
+  let maxDiff = -1
+  for (const m of matches) {
+    const diff = Math.abs((m.home_score || 0) - (m.away_score || 0))
+    if (diff > maxDiff) { maxDiff = diff; biggestWin = `${m.home_team} ${m.home_score}-${m.away_score} ${m.away_team}` }
+  }
+
+  const teamGoals: Record<string, number> = {}
+  for (const m of matches) {
+    teamGoals[m.home_team] = (teamGoals[m.home_team] || 0) + (m.home_score || 0)
+    teamGoals[m.away_team] = (teamGoals[m.away_team] || 0) + (m.away_score || 0)
+  }
+  const mostGoalsTeam = Object.entries(teamGoals).sort((a, b) => b[1] - a[1])[0]
+  const mostGoals = mostGoalsTeam ? `${mostGoalsTeam[0]} (${mostGoalsTeam[1]})` : ''
+
+  const teamConceded: Record<string, number> = {}
+  for (const m of matches) {
+    teamConceded[m.home_team] = (teamConceded[m.home_team] || 0) + (m.away_score || 0)
+    teamConceded[m.away_team] = (teamConceded[m.away_team] || 0) + (m.home_score || 0)
+  }
+  const cleanSheets = Object.entries(teamConceded)
+    .filter(([, c]) => c === 0)
+    .map(([t]) => t).join(',')
+
+  const scorers: Record<string, number> = {}
+
+  return NextResponse.json({
+    stats: { totalMatches, completed, totalGoals, avgGoalsPerMatch, biggestWin, mostGoals, cleanSheets },
+    scorers,
+  })
 }

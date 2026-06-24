@@ -16,3 +16,7 @@ command = "curl -H 'Authorization: Bearer $CRON_SECRET' https://predict-ai-produ
 [cron.sync-matches]
 schedule = "*/5 * * * *"
 command = "curl -H 'Authorization: Bearer $CRON_SECRET' https://predict-ai-production.up.railway.app/api/cron/sync-matches"
+
+[cron.sync-news]
+schedule = "0 0,8,16 * * *"
+command = "curl -H 'Authorization: Bearer $CRON_SECRET' https://predict-ai-production.up.railway.app/api/cron/sync-news"
