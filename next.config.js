@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// Railway deploy trigger
 const nextConfig = {
   compress: true,
   productionBrowserSourceMaps: false,
