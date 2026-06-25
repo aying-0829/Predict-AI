@@ -3,6 +3,7 @@
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    await import('./app/api/cron/scheduler')
+    const { initScheduler } = await import('./app/api/cron/scheduler')
+    await initScheduler()
   }
 }
