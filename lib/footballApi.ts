@@ -39,24 +39,94 @@ async function fetchJSON(url: string, timeoutMs = 15000, retries = 1): Promise<R
   return null
 }
 
-// ── World Cup 2026 ──────────────────────────────────────────
+// ── 内存缓存（teams & stadiums）──────────────────────────────
 
+let teamsCache: Map<string, { id: string; name_en: string; fifa_code: string; flag: string }> | null = null
+let teamsCacheTime = 0
+let stadiumsCache: Map<string, { id: string; name_en: string; city_en: string; country_en: string; capacity: number }> | null = null
+let stadiumsCacheTime = 0
+const CACHE_TTL = 24 * 60 * 60 * 1000 // 24小时
+
+export interface WCTeamInfo {
+  id: string
+  name_en: string
+  fifa_code: string
+  flag: string
+}
+
+export interface WCStadiumInfo {
+  id: string
+  name_en: string
+  city_en: string
+  country_en: string
+  capacity: number
+}
+
+export async function fetchAllTeams(): Promise<Map<string, WCTeamInfo>> {
+  if (teamsCache && Date.now() - teamsCacheTime < CACHE_TTL) return teamsCache
+  const resp = await fetch('https://worldcup26.ir/get/teams')
+  const data = await resp.json()
+  teamsCache = new Map(
+    (data as any[]).map((t: any) => [
+      t.id,
+      { id: t.id, name_en: t.name_en, fifa_code: t.fifa_code || '', flag: t.flag || '' },
+    ])
+  )
+  teamsCacheTime = Date.now()
+  console.log(`[footballApi] Cached ${teamsCache.size} teams`)
+  return teamsCache
+}
+
+export async function fetchAllStadiums(): Promise<Map<string, WCStadiumInfo>> {
+  if (stadiumsCache && Date.now() - stadiumsCacheTime < CACHE_TTL) return stadiumsCache
+  const resp = await fetch('https://worldcup26.ir/get/stadiums')
+  const data = await resp.json()
+  stadiumsCache = new Map(
+    (data as any[]).map((s: any) => [
+      s.id,
+      { id: s.id, name_en: s.name_en, city_en: s.city_en || '', country_en: s.country_en || '', capacity: s.capacity || 0 },
+    ])
+  )
+  stadiumsCacheTime = Date.now()
+  console.log(`[footballApi] Cached ${stadiumsCache.size} stadiums`)
+  return stadiumsCache
+}
+
+// ── World Cup 2026 原始数据类型 ───────────────────────────────
+
+/** 匹配 worldcup26.ir /get/games 返回的单场比赛 */
 export interface WCMatchRaw {
   _id?: string
+  id?: string
+  home_team_id?: string
+  away_team_id?: string
+  home_team_name_en?: string
+  home_team_name_fa?: string
+  away_team_name_en?: string
+  away_team_name_fa?: string
+  home_score?: string
+  away_score?: string
+  home_scorers?: string   // JSON 字符串或 "null"
+  away_scorers?: string   // JSON 字符串或 "null"
+  group?: string
+  matchday?: string
+  local_date?: string     // "MM/DD/YYYY HH:mm"
+  persian_date?: string
+  stadium_id?: string
+  finished?: string       // "TRUE" / "FALSE"
+  time_elapsed?: string   // "finished" / "notstarted" / 分钟数字字符串
+  type?: string
+  // 兼容旧字段名（渐进式迁移）
   home_team?: string
   away_team?: string
-  home_score?: number | null
-  away_score?: number | null
-  date?: string
-  status?: string
-  minute?: number | null
-  group?: string
-  stadium?: string
-  // 兼容其他字段名
   homeTeam?: string
   awayTeam?: string
   homeScore?: number | null
   awayScore?: number | null
+  date?: string
+  status?: string
+  minute?: number | null
+  stadium?: string
 }
 
 export interface WCGroupRaw {
@@ -102,7 +172,7 @@ export async function fetchLiveMatches(): Promise<WCMatchRaw[] | null> {
   const all = await fetchWorldCupGames()
   if (!all) return null
   return all.filter((m: any) => {
-    const s = (m.status || '').toLowerCase()
-    return s.includes('live') || s.includes('ongoing') || s.includes('in_play')
+    const elapsed = String(m.time_elapsed || m.status || '')
+    return elapsed !== 'finished' && elapsed !== 'notstarted'
   })
 }

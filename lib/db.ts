@@ -242,6 +242,11 @@ function initDBInternal(database: Database.Database): void {
   try { database.exec('ALTER TABLE matches ADD COLUMN minute INTEGER DEFAULT NULL') } catch { /* 已存在 */ }
   try { database.exec('ALTER TABLE matches ADD COLUMN home_score_ht INTEGER DEFAULT NULL') } catch { /* 已存在 */ }
   try { database.exec('ALTER TABLE matches ADD COLUMN away_score_ht INTEGER DEFAULT NULL') } catch { /* 已存在 */ }
+  try { database.exec("ALTER TABLE matches ADD COLUMN source_id TEXT DEFAULT ''") } catch { /* 已存在 */ }
+  try { database.exec("ALTER TABLE matches ADD COLUMN home_scorers TEXT DEFAULT ''") } catch { /* 已存在 */ }
+  try { database.exec("ALTER TABLE matches ADD COLUMN away_scorers TEXT DEFAULT ''") } catch { /* 已存在 */ }
+  try { database.exec('ALTER TABLE matches ADD COLUMN matchday INTEGER DEFAULT NULL') } catch { /* 已存在 */ }
+  try { database.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_matches_source_id ON matches(source_id)') } catch { /* 已存在 */ }
 
   // ============ 比赛事件 & 新闻表 ============
   database.exec(`
