@@ -248,6 +248,31 @@ function initDBInternal(database: Database.Database): void {
   try { database.exec('ALTER TABLE matches ADD COLUMN matchday INTEGER DEFAULT NULL') } catch { /* 已存在 */ }
   try { database.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_matches_source_id ON matches(source_id)') } catch { /* 已存在 */ }
 
+  // ============ wc_matches 表（worldcup26.ir 同步专用） ============
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS wc_matches (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      source_id INTEGER UNIQUE NOT NULL,
+      home_team TEXT NOT NULL DEFAULT '',
+      away_team TEXT NOT NULL DEFAULT '',
+      home_score INTEGER DEFAULT NULL,
+      away_score INTEGER DEFAULT NULL,
+      home_scorers TEXT DEFAULT '',
+      away_scorers TEXT DEFAULT '',
+      status TEXT DEFAULT 'scheduled',
+      group_name TEXT DEFAULT '',
+      stadium TEXT DEFAULT '',
+      match_date TEXT DEFAULT '',
+      match_time TEXT DEFAULT '',
+      time_elapsed TEXT DEFAULT '',
+      matchday INTEGER DEFAULT NULL,
+      match_type TEXT DEFAULT 'group',
+      finished INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now','localtime')),
+      updated_at TEXT DEFAULT (datetime('now','localtime'))
+    );
+  `)
+
   // ============ 比赛事件 & 新闻表 ============
   database.exec(`
     CREATE TABLE IF NOT EXISTS match_events (
