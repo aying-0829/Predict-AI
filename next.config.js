@@ -9,6 +9,7 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   experimental: {
+    instrumentationHook: true,
     optimizePackageImports: ['recharts', 'html2canvas'],
   },
 }
