@@ -66,8 +66,13 @@ export async function fetchAllTeams(): Promise<Map<string, WCTeamInfo>> {
   if (teamsCache && Date.now() - teamsCacheTime < CACHE_TTL) return teamsCache
   const resp = await fetch('https://worldcup26.ir/get/teams')
   const data = await resp.json()
+  const teamsArr = (data as any).teams || data
+  if (!Array.isArray(teamsArr)) {
+    console.error('[footballApi] fetchAllTeams: unexpected response format', typeof data)
+    return teamsCache ?? new Map()
+  }
   teamsCache = new Map(
-    (data as any[]).map((t: any) => [
+    teamsArr.map((t: any) => [
       t.id,
       { id: t.id, name_en: t.name_en, fifa_code: t.fifa_code || '', flag: t.flag || '' },
     ])
@@ -81,8 +86,13 @@ export async function fetchAllStadiums(): Promise<Map<string, WCStadiumInfo>> {
   if (stadiumsCache && Date.now() - stadiumsCacheTime < CACHE_TTL) return stadiumsCache
   const resp = await fetch('https://worldcup26.ir/get/stadiums')
   const data = await resp.json()
+  const stadiumsArr = (data as any).stadiums || data
+  if (!Array.isArray(stadiumsArr)) {
+    console.error('[footballApi] fetchAllStadiums: unexpected response format', typeof data)
+    return stadiumsCache ?? new Map()
+  }
   stadiumsCache = new Map(
-    (data as any[]).map((s: any) => [
+    stadiumsArr.map((s: any) => [
       s.id,
       { id: s.id, name_en: s.name_en, city_en: s.city_en || '', country_en: s.country_en || '', capacity: s.capacity || 0 },
     ])
