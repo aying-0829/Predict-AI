@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 
         // Upsert: check by source_id (MongoDB _id from API)
         const existing = db
-          .prepare('SELECT id FROM matches WHERE source_id = ? AND source_id != ''')
+          .prepare(`SELECT id FROM matches WHERE source_id = ? AND source_id != ''`)
           .get(sourceId) as { id: number } | undefined
 
         if (existing) {
