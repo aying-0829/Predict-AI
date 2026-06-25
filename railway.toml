@@ -3,6 +3,9 @@ builder = "nixpacks"
 buildCommand = "npm run build"
 startCommand = "next start"
 
+[build.nixpacks]
+nixPkgs = ["nodejs_20"]
+
 [volumes]
 data = "/data"
 
