@@ -12,6 +12,9 @@ const nextConfig = {
     instrumentationHook: true,
     optimizePackageImports: ['recharts', 'html2canvas'],
   },
+  generateBuildId: async () => {
+    return `build-${Date.now()}`
+  },
 }
 
 module.exports = nextConfig
