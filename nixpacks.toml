@@ -1,0 +1,7 @@
+# Nixpacks native configuration — forces clean build
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = ["npm run build"]
