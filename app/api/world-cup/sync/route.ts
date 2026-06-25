@@ -189,3 +189,131 @@ export async function GET() {
     updated,
   })
 }
+
+// ── POST: 接收本地比赛数据写入 wc_matches ──
+interface LocalMatch {
+  id: string
+  group: string
+  home: string
+  away: string
+  homeFlag?: string
+  awayFlag?: string
+  homeScore?: number | null
+  awayScore?: number | null
+  date: string
+  time: string
+  stadium: string
+  city?: string
+  status: 'completed' | 'live' | 'upcoming'
+}
+
+function parseSourceId(id: string): number {
+  const groupLetter = id.charCodeAt(0)
+  const matchNum = parseInt(id.slice(1)) || 0
+  if (groupLetter < 65 || groupLetter > 90 || matchNum <= 0) return 0
+  return (groupLetter - 64) * 100 + matchNum + 100000
+}
+
+export async function POST(request: Request) {
+  const db = getDB()
+
+  let body: { matches?: LocalMatch[] }
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ code: 400, message: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const matches = body.matches
+  if (!Array.isArray(matches) || matches.length === 0) {
+    return NextResponse.json({ code: 400, message: 'Missing or empty matches array' }, { status: 400 })
+  }
+
+  const upsert = db.prepare(`
+    INSERT INTO wc_matches (
+      source_id, home_team, away_team, home_score, away_score,
+      home_scorers, away_scorers, status, group_name, stadium,
+      match_date, match_time, time_elapsed, matchday, match_type, finished
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(source_id) DO UPDATE SET
+      home_team = excluded.home_team,
+      away_team = excluded.away_team,
+      home_score = excluded.home_score,
+      away_score = excluded.away_score,
+      home_scorers = excluded.home_scorers,
+      away_scorers = excluded.away_scorers,
+      status = excluded.status,
+      group_name = excluded.group_name,
+      stadium = excluded.stadium,
+      match_date = excluded.match_date,
+      match_time = excluded.match_time,
+      time_elapsed = excluded.time_elapsed,
+      matchday = excluded.matchday,
+      match_type = excluded.match_type,
+      finished = excluded.finished,
+      updated_at = datetime('now','localtime')
+  `)
+
+  let inserted = 0
+  let updated = 0
+  const errors: string[] = []
+
+  const insertAll = db.transaction(() => {
+    for (const m of matches) {
+      const sourceId = parseSourceId(m.id)
+      if (!sourceId) {
+        errors.push(`Invalid match id: "${m.id}"`)
+        continue
+      }
+      if (!m.home || !m.away) {
+        errors.push(`Missing team names for match ${m.id}`)
+        continue
+      }
+
+      const status = m.status === 'completed' ? 'finished' : m.status === 'live' ? 'live' : 'scheduled'
+      const finishedFlag = m.status === 'completed' ? 1 : 0
+      const timeElapsed = m.status === 'completed' ? 'finished' : ''
+
+      const existed = db.prepare('SELECT id FROM wc_matches WHERE source_id = ?').get(sourceId)
+
+      upsert.run(
+        sourceId,
+        m.home,
+        m.away,
+        m.homeScore ?? null,
+        m.awayScore ?? null,
+        '',
+        '',
+        status,
+        m.group || '',
+        m.stadium || '',
+        m.date || '',
+        m.time || '',
+        timeElapsed,
+        null,
+        'group',
+        finishedFlag,
+      )
+
+      if (existed) {
+        updated++
+      } else {
+        inserted++
+      }
+    }
+  })
+
+  const countBefore = (db.prepare('SELECT COUNT(*) as cnt FROM wc_matches').get() as { cnt: number }).cnt
+  insertAll()
+  const countAfter = (db.prepare('SELECT COUNT(*) as cnt FROM wc_matches').get() as { cnt: number }).cnt
+  inserted = Math.max(0, countAfter - countBefore)
+
+  return NextResponse.json({
+    code: 0,
+    message: `POST sync complete: ${inserted} inserted, ${updated} updated, ${countAfter} total in DB`,
+    total: countAfter,
+    inserted,
+    updated,
+    errors: errors.length > 0 ? errors : undefined,
+  })
+}
